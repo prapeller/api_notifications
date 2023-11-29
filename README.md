@@ -1,24 +1,24 @@
 ## Search service
-https://github.com/prapeller/Async_API_sprint_2
+https://github.com/prapeller/api_search
 
 - provides films search possibility by name/genre and other film properties
 
 
 ## Auth service
-https://github.com/prapeller/Auth_sprint_2
+https://github.com/prapeller/api_auth
 
 - provides user session control by authentication/authorization
 
 
 ## UGC service
-https://github.com/prapeller/ugc_sprint_2
+https://github.com/prapeller/api_ugc
 
 - provides possibility for users collect and control their activity
 - provides possibility for analytics team analise users activity, make business conclusions, and improve online cinema based on these conclusions
 
 
 ## Notification service
-https://github.com/prapeller/notifications_sprint_1
+https://github.com/prapeller/api_notifications
 
 - provides possibility for users to receive/not receive (switch off/on) notifications (email / telegram / interface)
 - provides possibility for cinema to send notifications:
