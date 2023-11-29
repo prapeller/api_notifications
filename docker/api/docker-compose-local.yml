@@ -1,0 +1,178 @@
+version: "3.9"
+
+services:
+
+  redis_notifications:
+    build:
+      context: ../..
+      dockerfile: ./docker/api/redis/Dockerfile
+    container_name: redis_notifications
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli", "ping", "|", "grep", "PONG" ]
+      interval: 3s
+      retries: 3
+    networks:
+      - local_network_notifications
+    env_file:
+      - ../../.envs/.docker-compose-local/.redis
+    ports:
+      - "6383:6379"
+
+  rabbitmq_notifications:
+    build:
+      context: ../..
+      dockerfile: ./docker/api/rabbitmq/Dockerfile
+    container_name: rabbitmq_notifications
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - local_network_notifications
+
+  celery_worker_notifications:
+    build:
+      context: ../..
+      dockerfile: ./docker/api/Dockerfile
+      args:
+        - BUILD_ENV=local
+    container_name: celery_worker_notifications
+    command: /start_celeryworker
+    volumes:
+      - static_files_notifications_volume:/app/api_notifications/staticfiles
+      - media_files_notifications_volume:/app/api_notifications/mediafiles
+      - postgres_backups_notifications_volume:/app/api_notifications/staticfiles/backups
+      - ../..:/app
+    depends_on:
+      redis_notifications:
+        condition: service_healthy
+      rabbitmq_notifications:
+        condition: service_healthy
+    networks:
+      - local_network_notifications
+      - shared_network
+    env_file:
+      - ../../.envs/.docker-compose-local/.postgres
+      - ../../.envs/.docker-compose-local/.redis
+      - ../../.envs/.docker-compose-local/.api
+
+  celery_beat_notifications:
+    build:
+      context: ../..
+      dockerfile: ./docker/api/Dockerfile
+      args:
+        - BUILD_ENV=local
+    command: /start_beat
+    container_name: celery_beat_notifications
+    volumes:
+      - static_files_notifications_volume:/app/api_notifications/staticfiles
+      - media_files_notifications_volume:/app/api_notifications/mediafiles
+      - postgres_backups_notifications_volume:/app/api_notifications/staticfiles/backups
+      - ../../api_notifications:/app/api_notifications
+    depends_on:
+      redis_notifications:
+        condition: service_healthy
+      rabbitmq_notifications:
+        condition: service_healthy
+    networks:
+      - local_network_notifications
+      - shared_network
+    env_file:
+      - ../../.envs/.docker-compose-local/.postgres
+      - ../../.envs/.docker-compose-local/.redis
+      - ../../.envs/.docker-compose-local/.api
+
+  celery_flower_notifications:
+    build:
+      context: ../..
+      dockerfile: ./docker/api/Dockerfile
+      args:
+        - BUILD_ENV=local
+    command: /start_flower
+    container_name: celery_flower_notifications
+    volumes:
+      - ../..:/app
+    env_file:
+      - ../../.envs/.docker-compose-local/.postgres
+      - ../../.envs/.docker-compose-local/.redis
+      - ../../.envs/.docker-compose-local/.api
+    ports:
+      - "5555:5555"
+    depends_on:
+      redis_notifications:
+        condition: service_healthy
+    networks:
+      - local_network_notifications
+      - shared_network
+
+  api_notifications:
+    build:
+      context: ../..
+      dockerfile: ./docker/api/Dockerfile
+      args:
+        - BUILD_ENV=local
+    container_name: api_notifications
+    command: /start_local
+    volumes:
+      - static_files_notifications_volume:/app/api_notifications/staticfiles
+      - media_files_notifications_volume:/app/api_notifications/mediafiles
+      - postgres_backups_notifications_volume:/app/api_notifications/staticfiles/backups
+      - ../../api_notifications:/app/api_notifications
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -H 'X-Request-Id: healthcheck' --fail -f http://$$API_NOTIFICATIONS_HOST:$$API_NOTIFICATIONS_PORT/$$DOCS_URL" ]
+      interval: 10s
+      timeout: 30s
+      retries: 3
+    env_file:
+      - ../../.envs/.docker-compose-local/.postgres
+      - ../../.envs/.docker-compose-local/.api
+      - ../../.envs/.docker-compose-local/.redis
+    networks:
+      - local_network_notifications
+      - shared_network
+    expose:
+      - "8083"
+    ports:
+      - "8083:8083"
+
+  nginx_notifications:
+    restart: always
+    build:
+      context: ../..
+      dockerfile: ./docker/api/nginx/Dockerfile
+    container_name: nginx_notifications
+    env_file:
+      - ../../.envs/.docker-compose-local/.api
+    volumes:
+      - static_files_notifications_volume:/app/api_notifications/staticfiles
+      - media_files_notifications_volume:/app/api_notifications/mediafiles
+    depends_on:
+      - api_notifications
+    network_mode: host
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog_notifications
+    ports:
+      - "1025:1025" # SMTP server
+      - "8025:8025" # Web interface
+    logging:
+      driver: 'none'
+    networks:
+      - local_network_notifications
+
+
+networks:
+  local_network_notifications:
+    driver: bridge
+  shared_network:
+    external: true
+
+volumes:
+  static_files_notifications_volume:
+  media_files_notifications_volume:
+  postgres_backups_notifications_volume:

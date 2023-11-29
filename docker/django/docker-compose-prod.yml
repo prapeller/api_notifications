@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  django_notifications:
+    build:
+      context: ../..
+      dockerfile: ./docker/django/Dockerfile
+      args:
+        - BUILD_ENV=prod
+    command: /start_django
+    container_name: django_notifications
+    volumes:
+      - ../..:/app
+      - static_volume:/app/django_notifications/staticfiles
+      - media_volume:/app/django_notifications/mediafiles
+    expose:
+      - "8003"
+    env_file:
+      - ../../.envs/.prod/.django
+      - ../../.envs/.prod/.postgres
+    networks:
+      - prod_network_notifications
+      - shared_network
+
+  nginx_django_notifications:
+    restart: always
+    build:
+      context: ../..
+      dockerfile: ./docker/django/nginx/Dockerfile
+    container_name: nginx_django_notifications
+    volumes:
+      - static_volume:/app/django_notifications/staticfiles
+      - media_volume:/app/django_notifications/mediafiles
+    env_file:
+      - ../../.envs/.prod/.django
+    depends_on:
+      - django_notifications
+    networks:
+      - prod_network_notifications
+      - shared_network
+
+networks:
+  prod_network_notifications:
+    driver: bridge
+  shared_network:
+    external: true
+
+volumes:
+  static_volume:
+  media_volume:

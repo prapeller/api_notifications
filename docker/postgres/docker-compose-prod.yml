@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+
+  postgres_notifications:
+    restart: always
+    build:
+      context: ../..
+      dockerfile: ./docker/postgres/Dockerfile
+    container_name: postgres_notifications
+    volumes:
+      - prod_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    networks:
+      - prod_network_notifications
+      - shared_network
+    env_file:
+      - ../../.envs/.prod/.postgres
+    expose:
+      - "5432"
+
+
+networks:
+  prod_network_notifications:
+    driver: bridge
+  shared_network:
+    external: true
+
+volumes:
+  prod_postgres_data: { }
+
+
+
+
+

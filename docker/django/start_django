@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+echo chmod +r -R ./mediafiles/
+chmod +r -R ./mediafiles/
+echo chmod +r -R ./staticfiles/
+chmod +r -R ./staticfiles/
+
+python3 manage.py makemigrations --no-input
+python3 manage.py migrate --no-input
+python3 manage.py collectstatic --no-input
+uwsgi --ini uwsgi.ini
+
+#python3 manage.py runserver ${DJANGO_HOST}:${DJANGO_PORT}

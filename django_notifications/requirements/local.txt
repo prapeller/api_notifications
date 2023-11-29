@@ -1,0 +1,13 @@
+-r base.txt
+
+psycopg2-binary==2.9.5
+django-debug-toolbar==3.8.1
+pytest==7.2.1
+uvicorn==0.20.0
+django-extensions==3.2.1
+faker==19.10.0
+pydantic_settings==2.0.3
+
+flake8==6.0.0
+black==23.1.0
+isort==5.12.0

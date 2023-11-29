@@ -1,0 +1,40 @@
+{% extends "admin/change_list.html" %}
+
+{% block result_list %}
+
+{{ block.super }}
+
+<form action="" method="post">
+    {% csrf_token %}
+
+    {% if enabled_queryset %}
+    <h2><<< Enabled</h2>
+    <table>
+        <tbody>
+        {% for obj in enabled_queryset %}
+        <tr>
+            <td><input type="checkbox" name="_selected_action" value="{{ obj.id }}"></td>
+            <td><a href="{% url 'admin:notifications_periodictaskmodel_change' obj.id %}">{{ obj }}</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    {% if disabled_queryset %}
+    <h2><<< Disabled</h2>
+    <table>
+        <tbody>
+        {% for obj in disabled_queryset %}
+        <tr>
+            <td><input type="checkbox" name="_selected_action" value="{{ obj.id }}"></td>
+            <td><a href="{% url 'admin:notifications_periodictaskmodel_change' obj.id %}">{{ obj }}</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+</form>
+
+{% endblock %}

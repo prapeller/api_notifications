@@ -1,0 +1,11 @@
+POSTGRES_HOST=postgres_notifications
+POSTGRES_PORT=5432
+POSTGRES_USER=postgres_notifications
+POSTGRES_DB=postgres_notifications
+POSTGRES_PASSWORD=postgres_notifications
+
+AUTH_POSTGRES_HOST=postgres_auth
+AUTH_POSTGRES_PORT=5432
+AUTH_POSTGRES_USER=postgres_auth
+AUTH_POSTGRES_DB=postgres_auth
+AUTH_POSTGRES_PASSWORD=postgres_auth

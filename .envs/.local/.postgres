@@ -1,0 +1,11 @@
+POSTGRES_HOST=127.0.0.1
+POSTGRES_PORT=5433
+POSTGRES_USER=postgres_notifications
+POSTGRES_DB=postgres_notifications
+POSTGRES_PASSWORD=postgres_notifications
+
+AUTH_POSTGRES_HOST=127.0.0.1
+AUTH_POSTGRES_PORT=5431
+AUTH_POSTGRES_USER=postgres_auth
+AUTH_POSTGRES_DB=postgres_auth
+AUTH_POSTGRES_PASSWORD=postgres_auth
